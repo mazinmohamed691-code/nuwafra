@@ -1,0 +1,11 @@
+export type Role = "customer" | "merchant" | "driver" | "admin";
+export interface User { id: string; email: string; full_name: string; phone?: string; role: Role; avatar_url?: string; is_active?: boolean; created_at?: string; }
+export interface Store { id: string; owner_id?: string; name: string; description?: string; type: "store" | "restaurant"; logo_url?: string; cover_url?: string; phone?: string; state?: string; city?: string; is_active?: boolean; rating?: number; delivery_fee?: number; min_order?: number; commission_rate?: number; created_at?: string; }
+export interface Category { id: string; name: string; icon?: string; type: "product" | "store"; sort_order?: number; }
+export interface Product { id: string; store_id: string; category_id?: string; name: string; description?: string; price: number; discount_price?: number; image_url?: string; stock?: number; is_active?: boolean; is_featured?: boolean; }
+export type OrderStatus = "pending" | "accepted" | "preparing" | "ready_for_pickup" | "assigned_to_driver" | "picked_up" | "on_the_way" | "delivered" | "cancelled";
+export interface Order { id: string; order_number: string; customer_id: string; store_id: string; driver_id?: string; address_id?: string; status: OrderStatus; product_total: number; delivery_fee: number; platform_commission: number; discount: number; merchant_due: number; driver_due: number; total_amount: number; payment_method: "cash" | "demo"; settlement_status: "pending" | "settled" | "cancelled"; notes?: string; created_at: string; updated_at?: string; }
+export interface OrderItem { id: string; order_id: string; product_id: string; product_name: string; unit_price: number; quantity: number; subtotal: number; }
+export interface Address { id: string; user_id?: string; label?: string; state: string; city: string; neighborhood?: string; street?: string; landmark?: string; extra_description?: string; phone: string; gps_lat?: number; gps_lng?: number; is_default?: boolean; }
+export interface Notification { id: string; user_id: string; title: string; body?: string; type?: string; is_read?: boolean; link?: string; created_at: string; }
+export interface CartItem { product: Product; quantity: number; store_id: string; store_name: string; }
