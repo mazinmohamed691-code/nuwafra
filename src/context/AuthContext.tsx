@@ -18,14 +18,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // تحميل المستخدم عند البداية
   useEffect(() => {
     const loadUser = async () => {
       // 1) إذا Supabase متصل — نتحقق من الجلسة أولاً
       if (isSupabaseConfigured && supabase) {
-        const { data: sessionData } = await supabase.auth.getSession();
+        const client = supabase;
+        const { data: sessionData } = await client.auth.getSession();
         if (sessionData?.session?.user) {
-          const { data: profile } = await supabase
+          const { data: profile } = await client
             .from("users")
             .select("*")
             .eq("id", sessionData.session.user.id)
@@ -51,12 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // الاستماع لتغييرات تسجيل الدخول/الخروج من Supabase
     if (isSupabaseConfigured && supabase) {
-      const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const client = supabase;
+      const { data: sub } = client.auth.onAuthStateChange(async (event, session) => {
         if (event === "SIGNED_OUT") {
           setUser(null);
           localStorage.removeItem(KEY);
         } else if (session?.user) {
-          const { data: profile } = await supabase
+          const { data: profile } = await client
             .from("users")
             .select("*")
             .eq("id", session.user.id)
@@ -80,10 +81,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login: AuthCtx["login"] = async (email, password) => {
     // 1) إذا Supabase متصل — استخدم Auth الحقيقي
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const client = supabase;
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
       if (error) return { error: error.message };
       if (data.user) {
-        const { data: profile } = await supabase
+        const { data: profile } = await client
           .from("users")
           .select("*")
           .eq("id", data.user.id)
@@ -107,7 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register: AuthCtx["register"] = async (email, password, fullName, role) => {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.auth.signUp({
+      const client = supabase;
+      const { data, error } = await client.auth.signUp({
         email, password,
         options: { data: { full_name: fullName, role } }
       });
@@ -115,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         // انتظر لحظة حتى ينشئ Trigger السجل
         await new Promise(r => setTimeout(r, 800));
-        const { data: profile } = await supabase
+        const { data: profile } = await client
           .from("users")
           .select("*")
           .eq("id", data.user.id)
